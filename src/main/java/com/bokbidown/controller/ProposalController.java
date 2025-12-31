@@ -20,4 +20,15 @@ public class ProposalController {
         Long proposalId = proposalService.submitProposal(request);
         return "입찰 성공! 제안서 ID: " + proposalId;
     }
+
+    @org.springframework.web.bind.annotation.GetMapping("/{propertyId}")
+    public java.util.List<com.bokbidown.dto.ProposalResponseDto> getProposals(@org.springframework.web.bind.annotation.PathVariable Long propertyId) {
+        return proposalService.getProposalsByPropertyId(propertyId);
+    }
+
+    @org.springframework.web.bind.annotation.PatchMapping("/{proposalId}/select")
+    public String selectProposal(@org.springframework.web.bind.annotation.PathVariable Long proposalId) {
+        proposalService.selectProposal(proposalId);
+        return "중개사 선택 완료! 거래가 성사되었습니다.";
+    }
 }

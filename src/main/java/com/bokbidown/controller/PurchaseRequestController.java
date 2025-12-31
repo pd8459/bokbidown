@@ -49,6 +49,14 @@ public class PurchaseRequestController {
         return "구매 의사가 확정되었습니다. 역경매가 시작됩니다.";
     }
 
+    @GetMapping("/auctions")
+    public java.util.List<com.bokbidown.dto.AuctionDto> getAuctions() {
+        return purchaseRequestRepository.findByStatus(RequestStatus.AUCTION_OPEN)
+                .stream()
+                .map(com.bokbidown.dto.AuctionDto::new)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
     @Data
     static class RequestDto {
         private Long buyerId;

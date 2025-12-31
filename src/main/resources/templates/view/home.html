@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<div layout:fragment="content">
+    <div class="p-5 mb-4 bg-light rounded-3 text-center border">
+        <div class="container-fluid py-5">
+            <h1 class="display-5 fw-bold text-primary">📉 복비다운</h1>
+            <p class="col-md-8 fs-4 mx-auto mt-3">
+                "집은 매매하고싶은데 복비가 비싸다고요?"<br>
+                매수자가 갑이 되는 세상, <br>
+                <strong>중개사 역경매 시스템</strong>으로 수수료를 아끼세요.
+            </p>
+            <div class="mt-4">
+                <a href="#" class="btn btn-primary btn-lg px-4 gap-3">매물 보러가기</a>
+                <a href="#" class="btn btn-outline-secondary btn-lg px-4">내 집 내놓기</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row align-items-md-stretch">
+        <div class="col-md-4">
+            <div class="h-100 p-5 text-bg-dark rounded-3">
+                <h2>1. 매물 탐색</h2>
+                <p>원하는 집을 찾고 '방문 신청'을 하세요.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="h-100 p-5 bg-body-tertiary border rounded-3">
+                <h2>2. 구매 확정</h2>
+                <p>집이 마음에 드시나요? '구매 확정' 버튼을 누르면 경매가 시작됩니다.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="h-100 p-5 text-bg-primary rounded-3">
+                <h2>3. 최저가 낙찰</h2>
+                <p>중개사들이 제안한 수수료를 비교하고 선택하세요.</p>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

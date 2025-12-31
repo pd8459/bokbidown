@@ -48,4 +48,28 @@ public class ProposalService {
 
         return proposal.getId();
     }
+
+    @Transactional(readOnly = true)
+    public java.util.List<com.bokbidown.dto.ProposalResponseDto> getProposalsByPropertyId(Long propertyId) {
+        return proposalRepository.findByPropertyId(propertyId)
+                .stream()
+                .map(com.bokbidown.dto.ProposalResponseDto::new)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public void selectProposal(Long proposalId) {
+        Proposal proposal = proposalRepository.findById(proposalId)
+                .orElseThrow(() -> new IllegalArgumentException("제안서가 없습니다."));
+
+        com.bokbidown.domain.PurchaseRequest request = purchaseRequestRepository.findAll().stream()
+                .filter(r -> r.getProperty().getId().equals(proposal.getProperty().getId())
+                        && r.getStatus() == RequestStatus.AUCTION_OPEN)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("진행 중인 경매를 찾을 수 없습니다."));
+
+        request.setStatus(RequestStatus.COMPLETED);
+        purchaseRequestRepository.save(request);
+
+        System.out.println("낙찰된 중개사: " + proposal.getAgent().getName() + ", 금액: " + proposal.getProposedFee());
+    }
 }
