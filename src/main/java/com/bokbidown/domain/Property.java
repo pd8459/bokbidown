@@ -1,5 +1,6 @@
 package com.bokbidown.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ public class Property {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User seller;
@@ -25,6 +27,8 @@ public class Property {
     private Long monthlyRent;
     private String description;
     private String photoUrl;
+    private Double latitude;
+    private Double longitude;
     private LocalDateTime createdAt;
 
     @PrePersist
