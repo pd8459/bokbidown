@@ -39,4 +39,9 @@ public class PropertyService {
     public List<Property> getAllProperties() {
         return propertyRepository.findAll();
     }
+
+    public Property getProperty(Long id) {
+        return propertyRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 매물이 없습니다. id=" + id));
+    }
 }

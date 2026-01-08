@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<div layout:fragment="content" class="container mt-4 mb-5" style="max-width: 800px;">
+
+    <div class="mb-4">
+        <a href="/properties" class="text-decoration-none text-secondary">
+            &larr; 지도 목록으로 돌아가기
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="bg-light rounded d-flex align-items-center justify-content-center border" style="height: 300px; width: 100%;">
+                <span class="fs-1 text-secondary">🏠</span>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <span class="badge bg-primary mb-2" th:if="${property.tradeType.name() == 'JEONSE'}">전세</span>
+            <span class="badge bg-success mb-2" th:if="${property.tradeType.name() == 'SALE'}">매매</span>
+            <span class="badge bg-warning text-dark mb-2" th:if="${property.tradeType.name() == 'WOLSE'}">월세</span>
+
+            <h2 class="fw-bold mb-3">
+                <span th:text="${property.deposit / 100000000} + '억'"></span>
+                <span th:if="${property.deposit % 100000000 > 0}" th:text="${(property.deposit % 100000000) / 10000} + '천'"></span>
+                <span th:if="${property.monthlyRent != null and property.monthlyRent > 0}"
+                      th:text="' / ' + ${property.monthlyRent / 10000}"></span>
+            </h2>
+
+            <p class="text-muted fs-5" th:text="${property.address}">서울시 어딘가</p>
+
+            <hr>
+
+            <div class="mb-4">
+                <div class="row mb-2">
+                    <div class="col-4 fw-bold text-secondary">등록일</div>
+                    <div class="col-8" th:text="${#temporals.format(property.createdAt, 'yyyy-MM-dd')}">2024-01-01</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-4 fw-bold text-secondary">집주인</div>
+                    <div class="col-8 text-truncate" th:text="${property.seller.name}">김철수</div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button class="btn btn-primary btn-lg fw-bold"> 집주인에게 채팅하기</button>
+                <button class="btn btn-outline-dark btn-lg">❤️ 찜하기</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4 shadow-sm">
+        <div class="card-header bg-white fw-bold">
+            상세 설명
+        </div>
+        <div class="card-body" style="min-height: 200px;">
+            <p class="card-text" th:text="${property.description}">
+                상세 설명 내용이 여기에 나옵니다.
+            </p>
+        </div>
+    </div>
+
+</div>
+</html>

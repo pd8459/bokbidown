@@ -10,27 +10,29 @@
     <div id="sidebar" class="bg-white shadow-lg position-absolute top-0 start-0 h-100 d-flex flex-column"
          style="width: 400px; z-index: 2000; transform: translateX(-100%); transition: transform 0.3s ease-in-out;">
 
-        <div class="p-3 border-bottom bg-light">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="fw-bold m-0">단지 내 매물 목록</h5>
+        <div class="p-3 border-bottom bg-white">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <h5 class="fw-bold m-0 text-primary">단지 내 매물</h5>
                 <button type="button" class="btn-close" onclick="closeSidebar()"></button>
             </div>
             <p id="complexAddress" class="text-muted small m-0 text-truncate"></p>
         </div>
 
-        <div id="propertyListContainer" class="flex-grow-1 overflow-auto p-0 bg-light">
+        <div class="d-flex border-bottom bg-light">
+            <button class="btn btn-link flex-fill text-decoration-none fw-bold text-dark py-2 active-tab" onclick="filterList('ALL', this)">전체</button>
+            <button class="btn btn-link flex-fill text-decoration-none text-muted py-2" onclick="filterList('SALE', this)">매매</button>
+            <button class="btn btn-link flex-fill text-decoration-none text-muted py-2" onclick="filterList('JEONSE', this)">전세</button>
+            <button class="btn btn-link flex-fill text-decoration-none text-muted py-2" onclick="filterList('WOLSE', this)">월세</button>
         </div>
+
+        <div id="propertyListContainer" class="flex-grow-1 overflow-auto p-0 bg-light"></div>
     </div>
 
     <script type="text/javascript" th:src="'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${kakaoMapKey}"></script>
 
     <script th:inline="javascript">
         var container = document.getElementById('map');
-        var options = {
-            center: new kakao.maps.LatLng(37.54, 126.99),
-            level: 7
-        };
-
+        var options = { center: new kakao.maps.LatLng(37.54, 126.99), level: 7 };
         var map = new kakao.maps.Map(container, options);
 
         var imageSrc = 'https://cdn-icons-png.flaticon.com/512/25/25694.png';
@@ -41,63 +43,97 @@
         var rawPropertyList = [[${properties}]];
         /*]]>*/
 
-        function formatMoney(money) {
-            if (money >= 100000000) {
-                var uk = Math.floor(money / 100000000);
-                var rest = Math.floor((money % 100000000) / 10000);
-                return uk + "억" + (rest > 0 ? " " + rest : "");
+        var currentComplexList = [];
+
+        function formatMoney(deposit, rent) {
+            var depositStr = "";
+            if (deposit >= 100000000) {
+                var uk = Math.floor(deposit / 100000000);
+                var rest = Math.floor((deposit % 100000000) / 10000);
+                depositStr = uk + "억" + (rest > 0 ? " " + rest : "");
             } else {
-                return Math.floor(money / 10000) + "만";
+                depositStr = Math.floor(deposit / 10000) + "만";
             }
+
+            if (rent && rent > 0) {
+                return depositStr + " / " + Math.floor(rent / 10000);
+            }
+            return depositStr;
         }
 
         var groupedProperties = {};
-
         rawPropertyList.forEach(function(data) {
             if (!data.latitude || !data.longitude) return;
             var key = data.latitude + "," + data.longitude;
-
-            if (!groupedProperties[key]) {
-                groupedProperties[key] = [];
-            }
+            if (!groupedProperties[key]) groupedProperties[key] = [];
             groupedProperties[key].push(data);
         });
 
         function openSidebar(address, list) {
-            var sidebar = document.getElementById('sidebar');
-            var container = document.getElementById('propertyListContainer');
-            var addressEl = document.getElementById('complexAddress');
+            currentComplexList = list;
+            document.getElementById('complexAddress').innerText = address;
+            document.getElementById('sidebar').style.transform = 'translateX(0)';
 
-            addressEl.innerText = address;
+            var allTab = document.querySelector('button[onclick*="ALL"]');
+            filterList('ALL', allTab);
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').style.transform = 'translateX(-100%)';
+        }
+
+        function filterList(type, btn) {
+            var buttons = document.querySelectorAll('#sidebar button.btn-link');
+            buttons.forEach(b => {
+                b.classList.remove('fw-bold', 'text-dark', 'active-tab');
+                b.classList.add('text-muted');
+            });
+            btn.classList.remove('text-muted');
+            btn.classList.add('fw-bold', 'text-dark', 'active-tab');
+
+            var filtered = currentComplexList.filter(function(item) {
+                if (type === 'ALL') return true;
+                return item.tradeType === type;
+            });
+
+            renderList(filtered);
+        }
+
+        function renderList(list) {
+            var container = document.getElementById('propertyListContainer');
             container.innerHTML = '';
 
-            list.forEach(function(item) {
-                var typeBadge = (item.tradeType === 'JEONSE')
-                    ? '<span class="badge bg-primary me-1">전세</span>'
-                    : '<span class="badge bg-success me-1">매매</span>';
+            if (list.length === 0) {
+                container.innerHTML = '<div class="text-center p-5 text-muted">매물이 없습니다.</div>';
+                return;
+            }
 
-                var priceStr = formatMoney(item.deposit);
+            list.forEach(function(item) {
+                var badgeHtml = '';
+                if (item.tradeType === 'SALE') {
+                    badgeHtml = '<span class="badge bg-success me-1">매매</span>';
+                } else if (item.tradeType === 'JEONSE') {
+                    badgeHtml = '<span class="badge bg-primary me-1">전세</span>';
+                } else if (item.tradeType === 'WOLSE') {
+                    badgeHtml = '<span class="badge bg-warning text-dark me-1">월세</span>';
+                }
+
+                var priceStr = formatMoney(item.deposit, item.monthlyRent);
                 var desc = item.description ? item.description : '설명 없음';
 
                 var html = `
                     <div class="card border-0 border-bottom rounded-0 p-3 hover-bg">
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <div>${typeBadge} <span class="fw-bold fs-5 text-primary">${priceStr}</span></div>
+                            <div>${badgeHtml} <span class="fw-bold fs-5 text-dark">${priceStr}</span></div>
                         </div>
-                        <div class="text-dark small mb-2 text-truncate">${desc}</div>
-                        <button class="btn btn-sm btn-outline-secondary w-100" onclick="alert('상세보기 ID: ${item.id}')">
+                        <div class="text-secondary small mb-2 text-truncate">${desc}</div>
+                        <button class="btn btn-sm btn-outline-secondary w-100" onclick="location.href='/properties/${item.id}'">
                             상세 정보 보기
                         </button>
                     </div>
                 `;
                 container.innerHTML += html;
             });
-
-            sidebar.style.transform = 'translateX(0)';
-        }
-
-        function closeSidebar() {
-            document.getElementById('sidebar').style.transform = 'translateX(-100%)';
         }
 
         for (var key in groupedProperties) {
@@ -114,16 +150,6 @@
                     clickable: true
                 });
 
-                var content = `<div style="background:red; color:white; border-radius:50%; width:20px; height:20px; text-align:center; font-size:12px; line-height:20px; font-weight:bold; position:relative; top:-50px; left:10px; box-shadow:1px 1px 3px rgba(0,0,0,0.3);">
-                                ${list.length}
-                               </div>`;
-
-                var customOverlay = new kakao.maps.CustomOverlay({
-                    position: new kakao.maps.LatLng(lat, lng),
-                    content: content
-                });
-                customOverlay.setMap(map);
-
                 kakao.maps.event.addListener(marker, 'click', function() {
                     openSidebar(firstItem.address, list);
                 });
@@ -133,6 +159,7 @@
 
     <style>
         .hover-bg:hover { background-color: #f8f9fa; cursor: pointer; }
+        .active-tab { border-bottom: 2px solid black; }
     </style>
 </div>
 </html>
