@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<div layout:fragment="content" class="d-flex flex-column" style="height: calc(100vh - 56px); background-color: #b2c7da;">
+
+    <div class="bg-white p-3 border-bottom shadow-sm d-flex justify-content-between align-items-center" style="z-index: 10;">
+        <div class="d-flex align-items-center">
+            <a href="javascript:history.back()" class="text-dark me-3 text-decoration-none fs-4">&larr;</a>
+            <div>
+                <h6 class="m-0 fw-bold" th:text="${room.property.deposit / 10000} + '만원'">가격</h6>
+                <small class="text-muted" th:text="${room.property.address}">주소</small>
+            </div>
+        </div>
+        <a th:href="@{/properties/{id}(id=${room.property.id})}" class="btn btn-sm btn-outline-secondary">매물 보기</a>
+    </div>
+
+    <div id="messageArea" class="flex-grow-1 p-3 overflow-auto">
+
+        <div th:each="msg : ${room.messages}" class="mb-3 d-flex"
+             th:classappend="${msg.sender.id == myId} ? 'justify-content-end' : 'justify-content-start'">
+
+            <div th:if="${msg.sender.id == myId}" class="d-flex align-items-end flex-column">
+                <div class="bg-warning text-dark p-2 rounded shadow-sm" style="max-width: 70%; border-radius: 10px; border-top-right-radius: 0;">
+                    <span th:text="${msg.message}">내용</span>
+                </div>
+                <small class="text-muted mt-1" style="font-size: 10px;"
+                       th:text="${#temporals.format(msg.sentAt, 'HH:mm')}">시간</small>
+            </div>
+
+            <div th:unless="${msg.sender.id == myId}" class="d-flex align-items-end">
+                <div class="bg-secondary rounded-circle text-white d-flex align-items-center justify-content-center me-2"
+                     style="width: 35px; height: 35px; font-size: 12px;">
+                    상대
+                </div>
+                <div class="d-flex flex-column">
+                    <div class="bg-white text-dark p-2 rounded shadow-sm" style="max-width: 70%; border-radius: 10px; border-top-left-radius: 0;">
+                        <span th:text="${msg.message}">내용</span>
+                    </div>
+                    <small class="text-muted mt-1" style="font-size: 10px;"
+                           th:text="${#temporals.format(msg.sentAt, 'HH:mm')}">시간</small>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="bg-white p-3 border-top">
+        <form action="/chat/message" method="post" class="d-flex">
+            <input type="hidden" name="roomId" th:value="${room.id}">
+            <input type="text" name="message" class="form-control me-2" placeholder="메시지를 입력하세요..." required autocomplete="off">
+            <button type="submit" class="btn btn-warning fw-bold">전송</button>
+        </form>
+    </div>
+
+    <script>
+        var messageArea = document.getElementById('messageArea');
+        messageArea.scrollTop = messageArea.scrollHeight;
+    </script>
+
+</div>
+</html>

@@ -46,7 +46,13 @@
             </div>
 
             <div class="d-grid gap-2">
-                <button class="btn btn-primary btn-lg fw-bold"> 집주인에게 채팅하기</button>
+                <form action="/chat/room" method="post">
+                    <input type="hidden" name="propertyId" th:value="${property.id}">
+                    <button type="submit" class="btn btn-primary btn-lg fw-bold w-100">
+                        💬 채팅으로 문의하기
+                    </button>
+                </form>
+
                 <button class="btn btn-outline-dark btn-lg">❤️ 찜하기</button>
             </div>
         </div>
